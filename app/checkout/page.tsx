@@ -8,7 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export default function CheckoutPage() {
-  const { items, totalPrice } = useCart();
+  const { items, total } = useCart();
   const [step, setStep] = useState(1);
 
   return (
@@ -157,7 +157,7 @@ export default function CheckoutPage() {
                  <div className="space-y-4 border-t border-border pt-10">
                     <div className="flex justify-between text-sm">
                        <span className="font-light text-muted-foreground italic">Subtotal</span>
-                       <span className="font-bold">${totalPrice().toLocaleString()}</span>
+                       <span className="font-bold">${total.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                        <span className="font-light text-muted-foreground italic">Logistics</span>
@@ -165,7 +165,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex justify-between text-sm pt-4 border-t border-border">
                        <span className="font-bold uppercase tracking-widest text-[10px]">Total Settlement</span>
-                       <span className="text-2xl font-light text-luxury">${totalPrice().toLocaleString()}</span>
+                       <span className="text-2xl font-light text-luxury">${total.toLocaleString()}</span>
                     </div>
                  </div>
 

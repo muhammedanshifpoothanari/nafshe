@@ -7,7 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, totalPrice } = useCart();
+  const { items, removeItem, updateQuantity, total } = useCart();
 
   return (
     <div className="bg-background min-h-screen">
@@ -95,7 +95,7 @@ export default function CartPage() {
                    <div className="space-y-4">
                       <div className="flex justify-between text-sm">
                          <span className="font-light text-muted-foreground italic">Subtotal</span>
-                         <span className="font-bold">${totalPrice().toLocaleString()}</span>
+                         <span className="font-bold">${total.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                          <span className="font-light text-muted-foreground italic">Priority Maison Shipping</span>
@@ -103,7 +103,7 @@ export default function CartPage() {
                       </div>
                       <div className="flex justify-between text-sm border-t border-border pt-4">
                          <span className="font-bold uppercase tracking-widest text-[10px]">Total</span>
-                         <span className="text-xl font-bold text-luxury">${totalPrice().toLocaleString()}</span>
+                         <span className="text-xl font-bold text-luxury">${total.toLocaleString()}</span>
                       </div>
                    </div>
 

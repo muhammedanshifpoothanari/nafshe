@@ -108,148 +108,148 @@ export default function VendorDashboard() {
          {activeTab === 'overview' && (
            <div className="space-y-12 animate-fade-in">
               {/* Stats Grid */}
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {STATS.map((stat, i) => (
-              <div key={i} className="bg-white p-8 border border-border space-y-4">
-                 <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold">{stat.label}</p>
-                 <div className="flex items-end justify-between">
-                    <p className="text-3xl font-light text-luxury">{stat.value}</p>
-                    <span className={`text-[9px] font-bold ${stat.up ? 'text-green-500' : 'text-rose-500'}`}>{stat.change}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                 {STATS.map((stat, i) => (
+                   <div key={i} className="bg-white p-8 border border-border space-y-4">
+                      <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold">{stat.label}</p>
+                      <div className="flex items-end justify-between">
+                         <p className="text-3xl font-light text-luxury">{stat.value}</p>
+                         <span className={`text-[9px] font-bold ${stat.up ? 'text-green-500' : 'text-rose-500'}`}>{stat.change}</span>
+                      </div>
+                   </div>
+                 ))}
+              </div>
+
+              {/* Supply Chain Modules */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                 
+                 {/* Purchase Orders (POs) from Nafshe */}
+                 <div className="lg:col-span-7 bg-white border border-border shadow-sm overflow-hidden">
+                    <div className="p-8 border-b border-border flex items-center justify-between">
+                       <h2 className="text-xs uppercase tracking-[0.3em] font-bold">Open Purchase Orders</h2>
+                       <span className="text-[9px] text-accent font-bold uppercase tracking-widest">Nafshe HQ Issued</span>
+                    </div>
+                    <div className="overflow-x-auto">
+                       <table className="w-full text-left">
+                          <thead>
+                             <tr className="bg-muted/10 text-[9px] uppercase tracking-widest font-bold text-muted-foreground border-b border-border">
+                                <th className="px-8 py-5">PO Number</th>
+                                <th className="px-8 py-5">Issued Date</th>
+                                <th className="px-8 py-5">Value</th>
+                                <th className="px-8 py-5 text-right">Action</th>
+                             </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border">
+                             {PURCHASE_ORDERS.map((po) => (
+                               <tr key={po.id} className="hover:bg-muted/5 transition-colors">
+                                  <td className="px-8 py-6">
+                                     <p className="text-xs font-bold text-luxury">{po.id}</p>
+                                     <p className="text-[9px] text-muted-foreground uppercase">{po.items} Units Requested</p>
+                                  </td>
+                                  <td className="px-8 py-6">
+                                     <p className="text-xs font-light">{po.date}</p>
+                                  </td>
+                                  <td className="px-8 py-6 text-xs font-bold">{po.total}</td>
+                                  <td className="px-8 py-6 text-right">
+                                     <button 
+                                        onClick={() => alert('Invoice generated and sent to Godown.')}
+                                        className="px-4 py-2 bg-primary text-white text-[8px] uppercase tracking-widest font-bold"
+                                     >
+                                        Generate Invoice
+                                     </button>
+                                  </td>
+                               </tr>
+                             ))}
+                          </tbody>
+                       </table>
+                    </div>
+                 </div>
+
+                 {/* Financial Status — Settlement Dates */}
+                 <div className="lg:col-span-5 bg-white border border-border p-10 space-y-8">
+                    <div className="flex items-center gap-3">
+                       <CreditCard className="w-5 h-5 text-accent" />
+                       <h2 className="text-xs uppercase tracking-[0.3em] font-bold">Automatic Settlement</h2>
+                    </div>
+                    <div className="space-y-6">
+                       <div className="p-6 bg-muted/20 border border-border rounded-sm space-y-4">
+                          <p className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Next Auto-Payment</p>
+                          <div className="flex justify-between items-end">
+                             <p className="text-2xl font-light text-luxury">May 30, 2024</p>
+                             <p className="text-xl font-bold text-accent">$12,400</p>
+                          </div>
+                          <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Status: Approved by Godown Receiving</p>
+                       </div>
+                       <div className="space-y-4">
+                          <p className="text-[10px] font-bold uppercase tracking-widest">Credit Terms Overview</p>
+                          <div className="flex justify-between items-center text-xs">
+                             <span className="font-light text-muted-foreground italic">Current Terms</span>
+                             <span className="font-bold">Net-30 Days</span>
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                             <span className="font-light text-muted-foreground italic">Overdue Invoices</span>
+                             <span className="font-bold text-rose-500">0 (Excellent)</span>
+                          </div>
+                       </div>
+                       <button 
+                          onClick={() => alert('Agreement update portal opening...')}
+                          className="w-full py-4 border border-primary text-primary text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-primary hover:text-white transition-all"
+                       >
+                          Update Credit Agreement
+                       </button>
+                    </div>
+                 </div>
+
+              </div>
+
+              {/* Barcode & Inventory Management */}
+              <div className="bg-white border border-border shadow-sm overflow-hidden">
+                 <div className="p-8 border-b border-border flex items-center justify-between">
+                    <h2 className="text-xs uppercase tracking-[0.3em] font-bold">Barcode & Item Tracking</h2>
+                    <div className="relative">
+                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                       <input type="text" placeholder="Scan Barcode..." className="pl-10 pr-4 py-2 border border-border text-[9px] uppercase tracking-widest font-bold w-64 focus:border-accent outline-none" />
+                    </div>
+                 </div>
+                 <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                       <thead>
+                          <tr className="bg-muted/10 text-[9px] uppercase tracking-widest font-bold text-muted-foreground border-b border-border">
+                             <th className="px-8 py-5">Item Code (SKU)</th>
+                             <th className="px-8 py-5">Universal Barcode</th>
+                             <th className="px-8 py-5">Valuation</th>
+                             <th className="px-8 py-5">Payment Due</th>
+                             <th className="px-8 py-5 text-right">Status</th>
+                          </tr>
+                       </thead>
+                       <tbody className="divide-y divide-border">
+                          {INVENTORY.map((item) => (
+                            <tr key={item.id} className="hover:bg-muted/5 transition-colors">
+                               <td className="px-8 py-6">
+                                  <p className="text-xs font-bold text-luxury">{item.id}</p>
+                                  <p className="text-[10px] font-light italic">{item.name}</p>
+                               </td>
+                               <td className="px-8 py-6">
+                                  <div className="flex items-center gap-3">
+                                     <Barcode className="w-4 h-4 text-muted-foreground" />
+                                     <span className="text-xs font-mono">{item.barcode}</span>
+                                  </div>
+                               </td>
+                               <td className="px-8 py-6 text-xs font-bold">{item.price}</td>
+                               <td className="px-8 py-6">
+                                  <p className="text-xs font-light">{item.paymentDate}</p>
+                                  <p className="text-[9px] text-accent uppercase font-bold tracking-widest">{item.terms}</p>
+                               </td>
+                               <td className="px-8 py-6 text-right">
+                                  <span className="px-3 py-1 bg-green-50 text-green-600 text-[8px] uppercase font-bold tracking-widest rounded-full">Received</span>
+                               </td>
+                            </tr>
+                          ))}
+                       </tbody>
+                    </table>
                  </div>
               </div>
-            ))}
-         </div>
-
-         {/* Supply Chain Modules */}
-         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-            
-            {/* Purchase Orders (POs) from Nafshe */}
-            <div className="lg:col-span-7 bg-white border border-border shadow-sm overflow-hidden">
-               <div className="p-8 border-b border-border flex items-center justify-between">
-                  <h2 className="text-xs uppercase tracking-[0.3em] font-bold">Open Purchase Orders</h2>
-                  <span className="text-[9px] text-accent font-bold uppercase tracking-widest">Nafshe HQ Issued</span>
-               </div>
-               <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                     <thead>
-                        <tr className="bg-muted/10 text-[9px] uppercase tracking-widest font-bold text-muted-foreground border-b border-border">
-                           <th className="px-8 py-5">PO Number</th>
-                           <th className="px-8 py-5">Issued Date</th>
-                           <th className="px-8 py-5">Value</th>
-                           <th className="px-8 py-5 text-right">Action</th>
-                        </tr>
-                     </thead>
-                     <tbody className="divide-y divide-border">
-                        {PURCHASE_ORDERS.map((po) => (
-                          <tr key={po.id} className="hover:bg-muted/5 transition-colors">
-                             <td className="px-8 py-6">
-                                <p className="text-xs font-bold text-luxury">{po.id}</p>
-                                <p className="text-[9px] text-muted-foreground uppercase">{po.items} Units Requested</p>
-                             </td>
-                             <td className="px-8 py-6">
-                                <p className="text-xs font-light">{po.date}</p>
-                             </td>
-                             <td className="px-8 py-6 text-xs font-bold">{po.total}</td>
-                             <td className="px-8 py-6 text-right">
-                                <button 
-                                   onClick={() => alert('Invoice generated and sent to Godown.')}
-                                   className="px-4 py-2 bg-primary text-white text-[8px] uppercase tracking-widest font-bold"
-                                >
-                                   Generate Invoice
-                                </button>
-                             </td>
-                          </tr>
-                        ))}
-                     </tbody>
-                  </table>
-               </div>
-            </div>
-
-            {/* Financial Status — Settlement Dates */}
-            <div className="lg:col-span-5 bg-white border border-border p-10 space-y-8">
-               <div className="flex items-center gap-3">
-                  <CreditCard className="w-5 h-5 text-accent" />
-                  <h2 className="text-xs uppercase tracking-[0.3em] font-bold">Automatic Settlement</h2>
-               </div>
-               <div className="space-y-6">
-                  <div className="p-6 bg-muted/20 border border-border rounded-sm space-y-4">
-                     <p className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Next Auto-Payment</p>
-                     <div className="flex justify-between items-end">
-                        <p className="text-2xl font-light text-luxury">May 30, 2024</p>
-                        <p className="text-xl font-bold text-accent">$12,400</p>
-                     </div>
-                     <p className="text-[8px] uppercase tracking-widest text-muted-foreground">Status: Approved by Godown Receiving</p>
-                  </div>
-                  <div className="space-y-4">
-                     <p className="text-[10px] font-bold uppercase tracking-widest">Credit Terms Overview</p>
-                     <div className="flex justify-between items-center text-xs">
-                        <span className="font-light text-muted-foreground italic">Current Terms</span>
-                        <span className="font-bold">Net-30 Days</span>
-                     </div>
-                     <div className="flex justify-between items-center text-xs">
-                        <span className="font-light text-muted-foreground italic">Overdue Invoices</span>
-                        <span className="font-bold text-rose-500">0 (Excellent)</span>
-                     </div>
-                  </div>
-                  <button 
-                     onClick={() => alert('Agreement update portal opening...')}
-                     className="w-full py-4 border border-primary text-primary text-[10px] uppercase tracking-[0.3em] font-bold hover:bg-primary hover:text-white transition-all"
-                  >
-                     Update Credit Agreement
-                  </button>
-               </div>
-            </div>
-
-         </div>
-
-         {/* Barcode & Inventory Management */}
-         <div className="bg-white border border-border shadow-sm overflow-hidden">
-            <div className="p-8 border-b border-border flex items-center justify-between">
-               <h2 className="text-xs uppercase tracking-[0.3em] font-bold">Barcode & Item Tracking</h2>
-               <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                  <input type="text" placeholder="Scan Barcode..." className="pl-10 pr-4 py-2 border border-border text-[9px] uppercase tracking-widest font-bold w-64 focus:border-accent outline-none" />
-               </div>
-            </div>
-            <div className="overflow-x-auto">
-               <table className="w-full text-left">
-                  <thead>
-                     <tr className="bg-muted/10 text-[9px] uppercase tracking-widest font-bold text-muted-foreground border-b border-border">
-                        <th className="px-8 py-5">Item Code (SKU)</th>
-                        <th className="px-8 py-5">Universal Barcode</th>
-                        <th className="px-8 py-5">Valuation</th>
-                        <th className="px-8 py-5">Payment Due</th>
-                        <th className="px-8 py-5 text-right">Status</th>
-                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                     {INVENTORY.map((item) => (
-                       <tr key={item.id} className="hover:bg-muted/5 transition-colors">
-                          <td className="px-8 py-6">
-                             <p className="text-xs font-bold text-luxury">{item.id}</p>
-                             <p className="text-[10px] font-light italic">{item.name}</p>
-                          </td>
-                          <td className="px-8 py-6">
-                             <div className="flex items-center gap-3">
-                                <Barcode className="w-4 h-4 text-muted-foreground" />
-                                <span className="text-xs font-mono">{item.barcode}</span>
-                             </div>
-                          </td>
-                          <td className="px-8 py-6 text-xs font-bold">{item.price}</td>
-                          <td className="px-8 py-6">
-                             <p className="text-xs font-light">{item.paymentDate}</p>
-                             <p className="text-[9px] text-accent uppercase font-bold tracking-widest">{item.terms}</p>
-                          </td>
-                          <td className="px-8 py-6 text-right">
-                             <span className="px-3 py-1 bg-green-50 text-green-600 text-[8px] uppercase font-bold tracking-widest rounded-full">Received</span>
-                          </td>
-                       </tr>
-                     ))}
-                  </tbody>
-               </table>
-            </div>
-            </div>
-            </div>
+           </div>
          )}
 
          {activeTab === 'storefront' && (
