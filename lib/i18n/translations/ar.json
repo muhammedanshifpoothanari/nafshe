@@ -1,0 +1,105 @@
+{
+  "common": {
+    "nafshe": "نفسة",
+    "cart": "السلة",
+    "search": "البحث",
+    "menu": "القائمة",
+    "close": "إغلاق",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "نجح",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "products": "المنتجات",
+    "collections": "المجموعات",
+    "about": "حول",
+    "contact": "اتصل",
+    "cart": "السلة",
+    "account": "الحساب"
+  },
+  "hero": {
+    "title": "حيث تعيش الأناقة في كل التفاصيل",
+    "subtitle": "اكتشفي العلامات التجارية الفاخرة المختارة للنساء. الموضة الراقية والأسلوب الخالد والحرفية الأصلية.",
+    "cta": "استكشفي المجموعة"
+  },
+  "products": {
+    "allProducts": "جميع المنتجات",
+    "featured": "المميزة",
+    "new": "الجديد",
+    "sale": "العروض",
+    "limited": "الإصدار المحدود",
+    "price": "السعر",
+    "rating": "التقييم",
+    "reviews": "التقييمات",
+    "addToCart": "أضفي إلى السلة",
+    "viewDetails": "عرض التفاصيل",
+    "inStock": "متوفر",
+    "outOfStock": "غير متوفر",
+    "sizes": "الأحجام",
+    "colors": "الألوان",
+    "quantity": "الكمية",
+    "filter": "تصفية",
+    "sort": "ترتيب حسب",
+    "noResults": "لم يتم العثور على منتجات"
+  },
+  "badges": {
+    "limited": "إصدار محدود",
+    "new": "جديد",
+    "sale": "عرض",
+    "onlyLeft": "{count} فقط متبقية",
+    "viewed": "{count} شخص يشاهدون",
+    "bought": "{count} شخص اشتراهن",
+    "bestSeller": "الأكثر مبيعاً",
+    "trending": "متجه"
+  },
+  "checkout": {
+    "cart": "سلة التسوق",
+    "shippingInfo": "معلومات الشحن",
+    "reviewOrder": "مراجعة الطلب",
+    "payment": "طريقة الدفع",
+    "confirmation": "تأكيد الطلب",
+    "orderNumber": "رقم الطلب",
+    "estimatedDelivery": "التسليم المتوقع",
+    "subtotal": "المجموع الفرعي",
+    "shipping": "الشحن",
+    "total": "الإجمالي",
+    "firstName": "الاسم الأول",
+    "lastName": "الاسم الأخير",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "address": "العنوان",
+    "city": "المدينة",
+    "country": "البلد",
+    "zipCode": "الرمز البريدي",
+    "cashOnDelivery": "الدفع عند الاستلام",
+    "continueToCheckout": "متابعة الدفع",
+    "placeOrder": "تأكيد الطلب",
+    "continueShopping": "متابعة التسوق"
+  },
+  "testimonials": {
+    "title": "ما يقوله عملاؤنا",
+    "verified": "مشترية موثقة"
+  },
+  "footer": {
+    "about": "حول نفسة",
+    "help": "المساعدة والدعم",
+    "legal": "الشروط القانونية",
+    "social": "تابعينا",
+    "newsletter": "النشرة الإخبارية",
+    "subscribe": "اشتركي في نشرتنا الإخبارية"
+  },
+  "errors": {
+    "required": "هذا الحقل مطلوب",
+    "invalidEmail": "عنوان بريد إلكتروني غير صالح",
+    "invalidPhone": "رقم هاتف غير صالح",
+    "serverError": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+  }
+}
