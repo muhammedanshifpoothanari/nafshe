@@ -81,7 +81,7 @@ export default function MaisonPage({ params }: { params: Promise<{ vendorId: str
             {maison.products.map((id: string) => {
               const product = ALL_PRODUCTS[id];
               return (
-                <Link key={id} href={`/products/${id}`} className="group space-y-6 animate-fade-in-up">
+                <Link key={id} href={`/product/${id}`} className="group space-y-6 animate-fade-in-up">
                    <div className="relative aspect-[3/4] bg-muted overflow-hidden">
                       <Image src={product.image} alt={product.name} fill className="object-cover transition-transform duration-[2s] group-hover:scale-110" />
                       <div className="absolute top-6 left-6 flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1.5 border border-border shadow-xl">

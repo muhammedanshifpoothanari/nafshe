@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Star, ShoppingBag, Plus, Scissors, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
@@ -14,44 +15,56 @@ interface Product {
   rating: number;
 }
 
-const NEW_ARRIVALS: Product[] = [
-  { id: 'n1', name: 'Monogram Tote', brand: 'Louis Vuitton', price: 4500, image: '/products/louis-vuitton-bag.jpg', tag: 'New', rating: 4.9 },
-  { id: 'n2', name: 'Silk Evening Dress', brand: 'Valentino', price: 3400, image: '/products/silk-dress.jpg', tag: 'New', rating: 5.0 },
-  { id: 'n3', name: 'Gold Jewelry Set', brand: 'Dior', price: 5200, image: '/products/gold-jewelry.jpg', tag: 'New', rating: 4.8 },
-  { id: 'n4', name: 'Statement Sunglasses', brand: 'Chanel', price: 950, image: '/products/designer-sunglasses.jpg', rating: 4.7 },
-  { id: 'n5', name: 'Air Jordan 1 Luxe', brand: 'Nike x Dior', price: 2200, image: '/products/jordan-sneaker.jpg', tag: 'Limited', rating: 4.9 },
-  { id: 'n6', name: 'Elite Chrono', brand: 'Patek Philippe', price: 85000, image: '/products/designer-watch.jpg', rating: 5.0 },
-  { id: 'n7', name: 'Diamond Tennis Bracelet', brand: 'Cartier', price: 12500, image: '/products/gold-jewelry.jpg', rating: 4.9 },
-  { id: 'n8', name: 'Velvet Evening Clutch', brand: 'Prada', price: 1800, image: '/products/louis-vuitton-bag.jpg', rating: 4.8 },
-];
-
-const TRENDING: Product[] = [
-  { id: 't1', name: 'Kelly 25 Sellier', brand: 'Hermès', price: 28000, image: '/assets/bag.jpg', tag: 'Trending', rating: 5.0 },
-  { id: 't2', name: 'Speedy P9 Bandoulière', brand: 'Louis Vuitton', price: 11000, image: '/assets/bag.jpg', tag: 'Trending', rating: 4.9 },
-  { id: 't3', name: 'Horsebit 1955 Bag', brand: 'Gucci', price: 3200, image: '/assets/bag.jpg', rating: 4.8 },
-  { id: 't4', name: 'Cactus Jack Watch', brand: 'Audemars Piguet', price: 125000, image: '/assets/jewelry.jpg', tag: 'Trending', rating: 5.0 },
-  { id: 't5', name: 'Lady Dior Mini', brand: 'Dior', price: 4900, image: '/assets/bag.jpg', rating: 4.9 },
-  { id: 't6', name: 'Serpenti Watch', brand: 'Bvlgari', price: 15400, image: '/assets/jewelry.jpg', rating: 4.9 },
-  { id: 't7', name: 'Roman Stud Bag', brand: 'Valentino', price: 3100, image: '/assets/bag.jpg', rating: 4.8 },
-  { id: 't8', name: 'Classic Flap Bag', brand: 'Chanel', price: 8200, image: '/assets/bag.jpg', rating: 4.9 },
-  { id: 't9', name: 'Lace pumps', brand: 'Jimmy Choo', price: 850, image: '/assets/hero.jpg', rating: 4.8 },
-  { id: 't10', name: 'Signature Belt', brand: 'Hermès', price: 1200, image: '/assets/hero.jpg', rating: 4.9 },
-  { id: 't11', name: 'Oyster Perpetual', brand: 'Rolex', price: 9500, image: '/assets/jewelry.jpg', rating: 5.0 },
-  { id: 't12', name: 'Cassette Bag', brand: 'Bottega Veneta', price: 3500, image: '/assets/bag.jpg', rating: 4.9 },
-];
-
-const FEATURED: Product[] = [
-  { id: 'f1', name: 'Rare Birkin 30', brand: 'Hermès', price: 25000, image: '/assets/bag.jpg', tag: 'Featured', rating: 5.0 },
-  { id: 'f2', name: 'Classic Flap Bag', brand: 'Chanel', price: 8200, image: '/assets/bag.jpg', tag: 'Featured', rating: 4.9 },
-  { id: 'f3', name: 'Roman Stud Bag', brand: 'Valentino', price: 3100, image: '/assets/bag.jpg', rating: 4.8 },
-  { id: 'f4', name: 'Serpenti Watch', brand: 'Bvlgari', price: 15400, image: '/assets/jewelry.jpg', rating: 4.9 },
-  { id: 'f5', name: 'Lady Dior Mini', brand: 'Dior', price: 4900, image: '/assets/bag.jpg', tag: 'Featured', rating: 5.0 },
-  { id: 'f6', name: 'Monogram Trunk', brand: 'Louis Vuitton', price: 12000, image: '/assets/bag.jpg', rating: 4.9 },
-  { id: 'f7', name: 'Velvet Evening Gown', brand: 'Gucci', price: 5600, image: '/assets/dress.jpg', rating: 4.8 },
-  { id: 'f8', name: 'Gold Link Bracelet', brand: 'Tiffany & Co.', price: 3200, image: '/assets/jewelry.jpg', rating: 4.7 },
-];
+// Static arrays are removed. Loaded dynamically via API below.
+interface Product {
+  id: string;
+  name: string;
+  brand: string;
+  price: number;
+  image?: string;
+  images?: string[];
+  tag?: string;
+  rating: number;
+}
 
 export function NafsheFeaturedGallery() {
+  const [newArrivals, setNewArrivals] = useState<Product[]>([]);
+  const [trending, setTrending] = useState<Product[]>([]);
+  const [featured, setFeatured] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        // Distribute dynamic products to the homepage galleries
+        const arrivals = data.filter((p: any) => p.tag === 'New' || p.tag === 'New In' || p.category === 'New Arrival' || p.category === 'tops').slice(0, 8);
+        const trend = data.filter((p: any) => p.tag === 'Trending' || p.tag === 'Hot' || p.category === 'Trending' || p.category === 'watches' || p.category === 'jewelry').slice(0, 8);
+        const feat = data.filter((p: any) => p.tag === 'Featured' || p.tag === 'Limited' || p.tag === 'Limited Edition' || p.category === 'Featured' || p.category === 'bags' || p.category === 'dresses').slice(0, 8);
+
+        // Fallbacks if empty
+        setNewArrivals(arrivals.length > 0 ? arrivals : data.slice(0, 8));
+        setTrending(trend.length > 0 ? trend : data.slice(8, 16));
+        setFeatured(feat.length > 0 ? feat : data.slice(16, 24));
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error loading featured gallery products:', err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <section id="featured-gallery" className="py-12 px-6 bg-white overflow-hidden animate-pulse">
+        <div className="max-w-7xl mx-auto space-y-20">
+          <div className="h-40 bg-muted rounded" />
+          <div className="h-40 bg-muted rounded" />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="featured-gallery" className="py-12 px-6 bg-white overflow-hidden relative">
       <div className="max-w-7xl mx-auto space-y-20">
@@ -66,7 +79,7 @@ export function NafsheFeaturedGallery() {
               </div>
            </div>
            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12">
-             {NEW_ARRIVALS.map((product) => (
+             {newArrivals.map((product) => (
                <ProductCard key={product.id} product={product} />
              ))}
            </div>
@@ -82,7 +95,7 @@ export function NafsheFeaturedGallery() {
               </div>
            </div>
            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12">
-             {TRENDING.map((product) => (
+             {trending.map((product) => (
                <ProductCard key={product.id} product={product} />
              ))}
            </div>
@@ -98,7 +111,7 @@ export function NafsheFeaturedGallery() {
               </div>
            </div>
            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12">
-             {FEATURED.map((product) => (
+             {featured.map((product) => (
                <ProductCard key={product.id} product={product} />
              ))}
            </div>
@@ -118,11 +131,11 @@ export function NafsheFeaturedGallery() {
 
 function ProductCard({ product }: { product: Product }) {
   return (
-    <Link href={`/products/${product.id}`} className="group space-y-4 animate-fade-in">
+    <Link href={`/product/${product.id}`} className="group space-y-4 animate-fade-in">
       <div className="relative aspect-[3/4] bg-neutral-50 overflow-hidden shadow-sm p-1.5 border border-dashed border-accent/10 group-hover:border-accent/40 transition-all duration-700">
         <div className="relative h-full w-full overflow-hidden">
            <Image 
-             src={product.image} 
+             src={product.images?.[0] || product.image || '/placeholder.jpg'} 
              alt={product.name} 
              fill 
              className="object-cover group-hover:scale-105 transition-all duration-1000" 

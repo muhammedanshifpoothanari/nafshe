@@ -2,8 +2,6 @@
 
 import { NafsheFooter } from '@/components/nafshe-footer';
 import { ProductCard } from '@/components/ProductCard';
-import { getBrandById } from '@/lib/data/brands';
-import { getProductsByBrand } from '@/lib/data/products';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
@@ -12,20 +10,54 @@ import { Suspense } from 'react';
 
 function BrandDetailPageContent() {
   const params = useParams();
-  const [isLoaded, setIsLoaded] = useState(false);
   const brandId = params.brandId as string;
-
-  const brand = getBrandById(brandId);
-  const brandProducts = brand ? getProductsByBrand(brand.name) : [];
+  const [brand, setBrand] = useState<any>(null);
+  const [brandProducts, setBrandProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoaded(true);
-  }, []);
+    fetch(`/api/brands/${brandId}`)
+      .then((res) => res.json())
+      .then((brandData) => {
+        if (brandData && brandData.name) {
+          setBrand(brandData);
+          // Fetch products for this brand
+          fetch(`/api/products?brand=${brandData.name}`)
+            .then((res) => res.json())
+            .then((productsData) => {
+              setBrandProducts(productsData);
+              setLoading(false);
+            })
+            .catch((err) => {
+              console.error(err);
+              setLoading(false);
+            });
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [brandId]);
 
-  if (!isLoaded || !brand) {
+  if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
+        <main className="flex-grow flex items-center justify-center">
+          <p className="text-[10px] uppercase tracking-[0.4em] text-accent font-bold animate-pulse">
+            Connecting to Maison Archives...
+          </p>
+        </main>
+        <NafsheFooter />
+      </div>
+    );
+  }
+
+  if (!brand) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
         <main className="flex-grow flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-serif font-light mb-4">Brand Not Found</h1>
@@ -34,14 +66,13 @@ function BrandDetailPageContent() {
             </Link>
           </div>
         </main>
-        <Footer />
+        <NafsheFooter />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
 
       <main className="flex-grow">
         {/* Navigation */}
@@ -121,7 +152,7 @@ function BrandDetailPageContent() {
         </section>
       </main>
 
-      <Footer />
+      <NafsheFooter />
     </div>
   );
 }

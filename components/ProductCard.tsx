@@ -45,7 +45,7 @@ export function ProductCard({ product, isNew, isLimited, isSale }: ProductCardPr
         {/* Image Container */}
         <div className="relative overflow-hidden bg-muted h-72 md:h-80">
           <Image
-            src={product.images[0]}
+            src={(product.images?.[0] && (product.images[0].startsWith('/') || product.images[0].startsWith('http://') || product.images[0].startsWith('https://'))) ? product.images[0] : '/assets/bag.jpg'}
             alt={product.name}
             fill
             className="object-cover group-hover:scale-110 transition-transform duration-500"

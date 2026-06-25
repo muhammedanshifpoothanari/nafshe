@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, X, Zap } from 'lucide-react';
-import { products } from '@/lib/data/products';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslation } from '@/lib/i18n';
@@ -11,24 +10,50 @@ export function SearchBar() {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [results, setResults] = useState<typeof products>([]);
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounced API search
+  const searchProducts = useCallback((query: string) => {
+    if (!query.trim()) {
+      setResults([]);
+      setIsOpen(false);
+      return;
+    }
+
+    setLoading(true);
+    fetch(`/api/products?q=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        const items = Array.isArray(data) ? data.slice(0, 6) : [];
+        setResults(items);
+        setIsOpen(true);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Search error:', err);
+        setLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
     if (searchQuery.trim()) {
-      const filtered = products.filter(
-        (product) =>
-          product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.category.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setResults(filtered.slice(0, 6));
-      setIsOpen(true);
+      debounceRef.current = setTimeout(() => {
+        searchProducts(searchQuery);
+      }, 300);
     } else {
       setResults([]);
       setIsOpen(false);
     }
-  }, [searchQuery]);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchQuery, searchProducts]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -71,7 +96,11 @@ export function SearchBar() {
       {/* Results Dropdown */}
       {isOpen && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-lg z-50">
-          {results.length > 0 ? (
+          {loading ? (
+            <div className="p-8 text-center">
+              <p className="text-sm text-muted-foreground animate-pulse">Searching...</p>
+            </div>
+          ) : results.length > 0 ? (
             <>
               <div className="p-4 space-y-2 max-h-96 overflow-y-auto">
                 {results.map((product) => (
@@ -83,7 +112,7 @@ export function SearchBar() {
                   >
                     <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                       <Image
-                        src={product.images[0]}
+                        src={(product.images?.[0] && (product.images[0].startsWith('/') || product.images[0].startsWith('http://') || product.images[0].startsWith('https://'))) ? product.images[0] : '/assets/bag.jpg'}
                         alt={product.name}
                         fill
                         className="object-cover group-hover:scale-110 transition-transform"
@@ -94,7 +123,7 @@ export function SearchBar() {
                       <p className="text-sm font-medium text-foreground line-clamp-1 group-hover:text-accent transition-colors">
                         {product.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">${product.price.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground">${product.price?.toLocaleString()}</p>
                     </div>
                   </Link>
                 ))}

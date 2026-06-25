@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Star, TrendingUp, Plus } from 'lucide-react';
 import Link from 'next/link';
@@ -10,24 +10,45 @@ interface Product {
   name: string;
   brand: string;
   price: number;
-  image: string;
+  image?: string;
+  images?: string[];
   tag?: string;
   rating: number;
-  category: 'New Arrival' | 'Featured' | 'Trending';
+  tabCategory: 'New Arrival' | 'Featured' | 'Trending';
 }
 
-const PRODUCTS: Product[] = [
-  { id: '1', name: 'Monogram Tote', brand: 'Louis Vuitton', price: 4500, image: '/products/louis-vuitton-bag.jpg', tag: 'New', rating: 4.9, category: 'New Arrival' },
-  { id: '2', name: 'Silk Evening Dress', brand: 'Valentino', price: 3400, image: '/products/silk-dress.jpg', tag: 'Rare', rating: 5.0, category: 'Featured' },
-  { id: '3', name: 'Gold Jewelry Set', brand: 'Dior', price: 5200, image: '/products/gold-jewelry.jpg', tag: 'Hot', rating: 4.8, category: 'Trending' },
-  { id: '4', name: 'Statement Sunglasses', brand: 'Chanel', price: 950, image: '/products/designer-sunglasses.jpg', rating: 4.7, category: 'New Arrival' },
-  { id: '5', name: 'Air Jordan 1 Luxe', brand: 'Nike x Dior', price: 2200, image: '/products/jordan-sneaker.jpg', tag: 'Limited', rating: 4.9, category: 'Featured' },
-  { id: '6', name: 'Elite Chrono', brand: 'Patek Philippe', price: 85000, image: '/products/designer-watch.jpg', rating: 5.0, category: 'Trending' },
-];
-
 export function NafsheProducts() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'New Arrival' | 'Featured' | 'Trending'>('New Arrival');
-  const filteredProducts = PRODUCTS.filter(p => p.category === activeTab);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        // Map dynamic products to the homepage tabs based on their tags/ratings
+        const mapped = data.map((p: any) => {
+          let tabCategory: 'New Arrival' | 'Featured' | 'Trending' = 'New Arrival';
+          if (p.tag === 'Trending' || p.tag === 'Hot' || p.views > 30) {
+            tabCategory = 'Trending';
+          } else if (p.tag === 'Featured' || p.rating >= 4.9) {
+            tabCategory = 'Featured';
+          }
+          return {
+            ...p,
+            tabCategory
+          };
+        });
+        setProducts(mapped);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error loading products for homepage:', err);
+        setLoading(false);
+      });
+  }, []);
+
+  const filteredProducts = products.filter(p => p.tabCategory === activeTab).slice(0, 8);
 
   return (
     <section id="collections" className="py-4 px-6 bg-white overflow-hidden relative border-b border-dashed border-black/5">
@@ -66,12 +87,12 @@ export function NafsheProducts() {
           {filteredProducts.map((product) => (
             <Link 
               key={product.id} 
-              href={`/products/${product.id}`} 
+              href={`/product/${product.id}`} 
               className="group space-y-1 p-0.5 border border-dashed border-transparent hover:border-accent/30 transition-all duration-700"
             >
               <div className="relative aspect-[4/3] bg-neutral-100 overflow-hidden shadow-sm">
                 <Image 
-                  src={product.image} 
+                  src={product.images?.[0] || product.image || '/placeholder.jpg'} 
                   alt={product.name} 
                   fill 
                   className="object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" 

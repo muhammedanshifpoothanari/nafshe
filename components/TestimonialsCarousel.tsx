@@ -1,13 +1,28 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import { testimonials } from '@/lib/data/testimonials';
 import { useTranslation } from '@/lib/i18n';
 
 export function TestimonialsCarousel() {
   const { t } = useTranslation();
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/testimonials')
+      .then(res => res.json())
+      .then(data => {
+        setTestimonials(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error loading testimonials:', err);
+        setLoading(false);
+      });
+  }, []);
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const prevButtonRef = useRef<HTMLButtonElement>(null);
   const nextButtonRef = useRef<HTMLButtonElement>(null);
@@ -40,7 +55,13 @@ export function TestimonialsCarousel() {
         <div className="relative">
           <div className="overflow-x-auto snap-x snap-mandatory scrollbar-hide" ref={scrollContainerRef}>
             <div className="flex gap-6 md:gap-8">
-              {testimonials.map((testimonial) => (
+              {loading ? (
+                [...Array(3)].map((_, i) => (
+                  <div key={i} className="flex-[0_0_100%] sm:flex-[0_0_calc(50%-12px)] lg:flex-[0_0_calc(33.333%-16px)] animate-pulse">
+                    <div className="luxury-card h-64 bg-muted" />
+                  </div>
+                ))
+              ) : testimonials.map((testimonial) => (
                 <div
                   key={testimonial.id}
                   className="flex-[0_0_100%] sm:flex-[0_0_calc(50%-12px)] lg:flex-[0_0_calc(33.333%-16px)]"

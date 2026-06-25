@@ -12,18 +12,20 @@ interface Story {
   link?: string;
 }
 
-const STORIES: Story[] = [
-  { id: '1', image: '/products/nike-luxury-shoes.jpg', brand: 'Chanel', title: 'The Spring Edit', link: '/products?brand=Chanel' },
-  { id: '2', image: '/products/louis-vuitton-bag.jpg', brand: 'Dior', title: 'Maison Dreams', link: '/products?brand=Dior' },
-  { id: '3', image: '/products/jordan-sneaker.jpg', brand: 'Valentino', title: 'Roma Series', link: '/products?brand=Valentino' },
-  { id: '4', image: '/products/designer-watch.jpg', brand: 'Prada', title: 'Milano Style', link: '/products?brand=Prada' },
-  { id: '5', image: '/products/designer-sunglasses.jpg', brand: 'Hermès', title: 'Silk Journal', link: '/products?brand=Hermès' },
-  { id: '6', image: '/products/silk-dress.jpg', brand: 'Gucci', title: 'Garden Party', link: '/products?brand=Gucci' },
-];
+// Static array removed. Loaded dynamically via API below.
 
 export function StoryCarousel() {
+  const [stories, setStories] = useState<Story[]>([]);
+  const STORIES = stories;
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [storyIndex, setStoryIndex] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/stories')
+      .then(res => res.json())
+      .then(data => setStories(data))
+      .catch(err => console.error('Error fetching stories:', err));
+  }, []);
 
   const closeStory = useCallback(() => {
     setSelectedStory(null);
@@ -37,7 +39,7 @@ export function StoryCarousel() {
     } else {
       closeStory();
     }
-  }, [storyIndex, closeStory]);
+  }, [storyIndex, closeStory, STORIES]);
 
   const prevStory = useCallback(() => {
     if (storyIndex > 0) {
@@ -45,7 +47,7 @@ export function StoryCarousel() {
       setStoryIndex(prevIdx);
       setSelectedStory(STORIES[prevIdx]);
     }
-  }, [storyIndex]);
+  }, [storyIndex, STORIES]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -113,12 +115,12 @@ export function StoryCarousel() {
                 <div className="p-[1.5px] rounded-full bg-gradient-to-tr from-rose-200 via-stone-200 to-amber-100 group-hover:scale-105 transition-transform duration-500">
                   <div className="p-[2px] rounded-full bg-background">
                     <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden transition-all duration-700">
-                      <Image src={story.image} alt={story.brand} fill className="object-cover" />
+                      <Image src={story.image} alt={story.brand || story.title || "Maison Story"} fill className="object-cover" />
                     </div>
                   </div>
                 </div>
                 <p className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground font-bold group-hover:text-foreground transition-colors">
-                  {story.brand}
+                  {story.brand || story.title}
                 </p>
               </button>
             ))}
@@ -155,10 +157,10 @@ export function StoryCarousel() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full border-2 border-accent/40 overflow-hidden bg-stone-100">
-                    <Image src={selectedStory.image} alt={selectedStory.brand} width={40} height={40} className="object-cover h-full w-full" />
+                    <Image src={selectedStory.image} alt={selectedStory.brand || selectedStory.title || "Maison Story"} width={40} height={40} className="object-cover h-full w-full" />
                   </div>
                   <div className="drop-shadow-md">
-                    <p className="text-xs font-black text-white uppercase tracking-[0.2em]">{selectedStory.brand}</p>
+                    <p className="text-xs font-black text-white uppercase tracking-[0.2em]">{selectedStory.brand || selectedStory.title}</p>
                     <p className="text-[9px] text-accent font-black uppercase tracking-tighter">Exclusive Feature</p>
                   </div>
                 </div>

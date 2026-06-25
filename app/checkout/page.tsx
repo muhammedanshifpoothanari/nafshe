@@ -8,8 +8,71 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export default function CheckoutPage() {
-  const { items, total } = useCart();
+  const { items, total, clear } = useCart();
   const [step, setStep] = useState(1);
+  const [shippingForm, setShippingForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    address: '',
+    city: 'Jeddah',
+    postalCode: '',
+    country: 'Saudi Arabia'
+  });
+
+  const handleFinalizeAcquisition = () => {
+    const sessionId = localStorage.getItem('nafshe_session_id') || '';
+    const formattedPayload = {
+      customerName: `${shippingForm.firstName} ${shippingForm.lastName}`,
+      customerEmail: shippingForm.email,
+      shippingAddress: shippingForm.address,
+      city: shippingForm.city,
+      postalCode: shippingForm.postalCode,
+      country: shippingForm.country,
+      vendor: items[0]?.brand || 'Nafshe HQ',
+      amount: total,
+      items: items.map(item => ({
+        productId: item.productId,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+        brand: item.brand
+      }))
+    };
+
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formattedPayload)
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          // Mark cart as converted in DB
+          if (sessionId) {
+            fetch('/api/carts', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                sessionId,
+                email: shippingForm.email,
+                converted: true
+              })
+            }).catch(err => console.error('Error converting cart:', err));
+          }
+          // Clear cart local state and move to step 3
+          clear();
+          setStep(3);
+        } else {
+          alert(data.message || 'Failed to place order');
+        }
+      })
+      .catch(err => {
+        console.error('Checkout error:', err);
+        alert('An error occurred during order checkout');
+      });
+  };
 
   return (
     <div className="bg-[#FBFBF9] min-h-screen">
@@ -40,25 +103,67 @@ export default function CheckoutPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                          <div className="space-y-2">
                             <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">First Name</label>
-                            <input required type="text" className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" />
+                            <input 
+                              required 
+                              type="text" 
+                              value={shippingForm.firstName}
+                              onChange={(e) => setShippingForm({ ...shippingForm, firstName: e.target.value })}
+                              className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" 
+                            />
                          </div>
                          <div className="space-y-2">
                             <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Last Name</label>
-                            <input required type="text" className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" />
+                            <input 
+                              required 
+                              type="text" 
+                              value={shippingForm.lastName}
+                              onChange={(e) => setShippingForm({ ...shippingForm, lastName: e.target.value })}
+                              className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" 
+                            />
                          </div>
                       </div>
                       <div className="space-y-2">
+                         <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Operational Email Address</label>
+                         <input 
+                           required 
+                           type="email" 
+                           placeholder="client@example.com" 
+                           value={shippingForm.email}
+                           onChange={(e) => setShippingForm({ ...shippingForm, email: e.target.value })}
+                           className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" 
+                         />
+                      </div>
+                      <div className="space-y-2">
                          <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Street Address</label>
-                         <input required type="text" placeholder="King Abdulaziz Road, Jeddah" className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" />
+                         <input 
+                           required 
+                           type="text" 
+                           placeholder="King Abdulaziz Road, Jeddah" 
+                           value={shippingForm.address}
+                           onChange={(e) => setShippingForm({ ...shippingForm, address: e.target.value })}
+                           className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" 
+                         />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                          <div className="space-y-2">
                             <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">City</label>
-                            <input required type="text" defaultValue="Jeddah" className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" />
+                            <input 
+                              required 
+                              type="text" 
+                              value={shippingForm.city}
+                              onChange={(e) => setShippingForm({ ...shippingForm, city: e.target.value })}
+                              className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" 
+                            />
                          </div>
                          <div className="space-y-2">
                             <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Postal Code</label>
-                            <input required type="text" className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" />
+                            <input 
+                              required 
+                              type="text" 
+                              value={shippingForm.postalCode}
+                              onChange={(e) => setShippingForm({ ...shippingForm, postalCode: e.target.value })}
+                              className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" 
+                            />
                          </div>
                          <div className="space-y-2">
                             <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Country</label>
@@ -103,7 +208,7 @@ export default function CheckoutPage() {
                       </div>
                    </div>
 
-                   <button onClick={() => setStep(3)} className="w-full py-6 bg-primary text-white text-[10px] uppercase tracking-[0.4em] font-bold shadow-2xl shadow-primary/20 hover:opacity-95 transition-all">
+                   <button onClick={handleFinalizeAcquisition} className="w-full py-6 bg-primary text-white text-[10px] uppercase tracking-[0.4em] font-bold shadow-2xl shadow-primary/20 hover:opacity-95 transition-all">
                       Finalize Acquisition
                    </button>
                 </div>

@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { products, getProductById } from '@/lib/data/products';
+import { useState, useEffect } from 'react';
 import { useCart } from '@/lib/context/cart-context';
 import { NafsheFooter } from '@/components/nafshe-footer';
 import { ProductBadges, SocialProof } from '@/components/ProductBadges';
@@ -10,16 +9,59 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Heart, Star, Check, Share2, Truck, RotateCcw, Shield } from 'lucide-react';
 
-export default function ProductPage({ params }: { params: { id: string } }) {
+import { useParams } from 'next/navigation';
+
+export default function ProductPage() {
   const { t } = useTranslation();
-  const product = getProductById(params.id);
+  const params = useParams();
+  const id = params?.id as string;
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0]);
-  const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0]);
+  const [selectedColor, setSelectedColor] = useState<string | undefined>();
+  const [selectedSize, setSelectedSize] = useState<string | undefined>();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [liked, setLiked] = useState(false);
   const [added, setAdded] = useState(false);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const { addItem } = useCart();
+
+  useEffect(() => {
+    // Pass ID directly to API (DB IDs are in format prod-xxx-1234)
+    fetch(`/api/products/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.id) {
+          setProduct(data);
+          setSelectedColor(data.colors?.[0]);
+          setSelectedSize(data.sizes?.[0]);
+          
+          // Fetch related
+          fetch(`/api/products?category=${data.category}`)
+            .then(res => res.json())
+            .then(allProducts => {
+              const filtered = allProducts.filter((p: any) => p.id !== data.id).slice(0, 4);
+              setRelatedProducts(filtered);
+            })
+            .catch(err => console.error(err));
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error loading product:', err);
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="bg-background min-h-screen flex items-center justify-center">
+        <p className="text-[10px] uppercase tracking-[0.4em] text-accent font-bold animate-pulse">
+          Retrieving Curated Masterpiece...
+        </p>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -49,13 +91,12 @@ export default function ProductPage({ params }: { params: { id: string } }) {
       quantity,
       color: selectedColor,
       size: selectedSize,
-      image: product.images[0],
+      image: product.images?.[0] || product.image || '/placeholder.jpg',
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
 
-  const relatedProducts = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
 
   return (
     <div className="bg-background min-h-screen text-foreground flex flex-col">
@@ -73,35 +114,49 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
           {/* Images */}
           <div className="space-y-4">
-            <div className="luxury-card p-0 overflow-hidden bg-muted h-96 md:h-[500px] flex items-center justify-center">
-              <Image
-                src={product.images[selectedImageIndex]}
-                alt={product.name}
-                fill
-                className="object-cover w-full h-full"
-                priority
-              />
-            </div>
-            {product.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-4">
-                {product.images.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedImageIndex(idx)}
-                    className={`luxury-card p-0 overflow-hidden h-24 cursor-pointer transition-all ${
-                      selectedImageIndex === idx ? 'ring-2 ring-accent' : 'opacity-60 hover:opacity-100'
-                    }`}
-                  >
+            {(() => {
+              const gallery = Array.isArray(product.images) && product.images.length > 0
+                ? product.images
+                : [
+                    product.images?.[0] || product.image || '/assets/bag.jpg',
+                    '/assets/jewelry.jpg',
+                    '/assets/dress.jpg',
+                    '/assets/bag.jpg'
+                  ];
+              return (
+                <>
+                  <div className="luxury-card relative p-0 overflow-hidden bg-muted h-96 md:h-[500px] flex items-center justify-center">
                     <Image
-                      src={img}
-                      alt={`${product.name} ${idx + 1}`}
+                      src={(gallery[selectedImageIndex] && (gallery[selectedImageIndex].startsWith('/') || gallery[selectedImageIndex].startsWith('http://') || gallery[selectedImageIndex].startsWith('https://'))) ? gallery[selectedImageIndex] : '/assets/bag.jpg'}
+                      alt={product.name}
                       fill
                       className="object-cover w-full h-full"
+                      priority
                     />
-                  </button>
-                ))}
-              </div>
-            )}
+                  </div>
+                  {gallery.length > 1 && (
+                    <div className="grid grid-cols-4 gap-4">
+                      {gallery.map((img, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedImageIndex(idx)}
+                          className={`luxury-card relative p-0 overflow-hidden h-24 cursor-pointer transition-all ${
+                            selectedImageIndex === idx ? 'ring-2 ring-accent' : 'opacity-60 hover:opacity-100'
+                          }`}
+                        >
+                          <Image
+                            src={(img && (img.startsWith('/') || img.startsWith('http://') || img.startsWith('https://'))) ? img : '/assets/bag.jpg'}
+                            alt={`${product.name} ${idx + 1}`}
+                            fill
+                            className="object-cover w-full h-full"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
 
           {/* Details */}
@@ -148,13 +203,6 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             <div className="space-y-2">
               <p className="text-3xl md:text-4xl font-bold text-accent">${product.price.toLocaleString()}</p>
             </div>
-
-            {/* Social Proof */}
-            {(viewCount > 0 || buyCount > 0) && (
-              <div>
-                <SocialProof viewCount={viewCount} buyCount={buyCount} />
-              </div>
-            )}
 
             {product.description && (
               <p className="text-foreground leading-relaxed text-base">{product.description}</p>
@@ -303,11 +351,12 @@ export default function ProductPage({ params }: { params: { id: string } }) {
               {relatedProducts.map(prod => (
                 <Link key={prod.id} href={`/product/${prod.id}`} className="group">
                   <div className="relative overflow-hidden rounded-lg bg-muted h-64 sm:h-72 mb-4">
-                    <img
-                      src={prod.images[0]}
+                    <Image
+                      src={(prod.images?.[0] && (prod.images[0].startsWith('/') || prod.images[0].startsWith('http://') || prod.images[0].startsWith('https://'))) ? prod.images[0] : '/assets/bag.jpg'}
                       alt={prod.name}
+                      fill
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 25vw, 20vw"
                     />
                   </div>
                   <h3 className="font-medium text-foreground group-hover:text-primary transition line-clamp-2 mb-1">

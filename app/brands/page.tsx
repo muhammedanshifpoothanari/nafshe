@@ -1,12 +1,28 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { NafsheFooter } from '@/components/nafshe-footer';
 import Link from 'next/link';
 import Image from 'next/image';
-import { brands } from '@/lib/data/brands';
 import { ArrowRight, Sparkles } from 'lucide-react';
 
 export default function BrandsPage() {
+  const [brands, setBrands] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/brands')
+      .then(res => res.json())
+      .then(data => {
+        setBrands(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching brands:', err);
+        setLoading(false);
+      });
+  }, []);
+
   // Sort brands alphabetically
   const sortedBrands = [...brands].sort((a, b) => 
     (a.name_display || a.name).localeCompare(b.name_display || b.name)
@@ -18,7 +34,7 @@ export default function BrandsPage() {
     if (!acc[letter]) acc[letter] = [];
     acc[letter].push(brand);
     return acc;
-  }, {} as Record<string, typeof brands>);
+  }, {} as Record<string, any[]>);
 
   const letters = Object.keys(groupedBrands).sort();
 
@@ -41,15 +57,25 @@ export default function BrandsPage() {
         </div>
 
         {/* Featured Brands Horizontal Scroll */}
-        <div className="mb-32 space-y-10 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-           <div className="flex items-center justify-between">
-              <h2 className="text-xl md:text-2xl font-light text-luxury tracking-tighter">Featured <span className="italic serif text-accent">Partners</span></h2>
-              <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-accent">
-                 <Sparkles className="w-3 h-3" />
-                 Exclusive Collections
-              </div>
-           </div>
-           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {loading ? (
+          <div className="mb-32 space-y-10 animate-pulse">
+            <div className="h-6 bg-muted w-1/4 rounded" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-64 bg-muted" />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="mb-32 space-y-10 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+             <div className="flex items-center justify-between">
+                <h2 className="text-xl md:text-2xl font-light text-luxury tracking-tighter">Featured <span className="italic serif text-accent">Partners</span></h2>
+                <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-accent">
+                   <Sparkles className="w-3 h-3" />
+                   Exclusive Collections
+                </div>
+             </div>
+             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {sortedBrands.slice(0, 4).map((brand) => (
                 <Link 
                   key={brand.id}
@@ -76,6 +102,7 @@ export default function BrandsPage() {
               ))}
            </div>
         </div>
+        )}
 
         {/* Alphabetical Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-20 gap-y-16 animate-fade-in-up" style={{ animationDelay: '400ms' }}>

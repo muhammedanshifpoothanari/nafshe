@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { products } from '@/lib/data/products';
+import { useState, useMemo, useEffect } from 'react';
 import { useCart } from '@/lib/context/cart-context';
 import { NafsheFooter } from '@/components/nafshe-footer';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronDown, Star } from 'lucide-react';
 
 const CATEGORIES = ['All', 'Abayas', 'Formal', 'Casual', 'Accessories', 'Limited'];
@@ -19,6 +19,22 @@ const PRICE_RANGES = [
 
 export default function ShopPage() {
   const { count } = useCart();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        setProducts(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error loading products:', err);
+        setLoading(false);
+      });
+  }, []);
+
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedBrand, setSelectedBrand] = useState('All');
   const [selectedPrice, setSelectedPrice] = useState('All Prices');
@@ -31,7 +47,7 @@ export default function ShopPage() {
     let result = products;
 
     if (selectedCategory !== 'All') {
-      result = result.filter(p => p.category === selectedCategory);
+      result = result.filter(p => p.category?.toLowerCase() === selectedCategory.toLowerCase());
     }
 
     if (selectedBrand !== 'All') {
@@ -52,7 +68,7 @@ export default function ShopPage() {
       default:
         return result;
     }
-  }, [selectedCategory, selectedBrand, selectedPrice, sortBy]);
+  }, [products, selectedCategory, selectedBrand, selectedPrice, sortBy]);
 
   return (
     <div className="bg-background min-h-screen text-foreground">
@@ -168,17 +184,28 @@ export default function ShopPage() {
             </div>
 
             {/* Products Grid */}
-            {filtered.length > 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-12 animate-pulse">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="space-y-4">
+                    <div className="bg-muted h-80 sm:h-96 rounded-lg" />
+                    <div className="h-4 bg-muted w-3/4 rounded" />
+                    <div className="h-4 bg-muted w-1/4 rounded" />
+                  </div>
+                ))}
+              </div>
+            ) : filtered.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
                 {filtered.map(product => (
                   <Link key={product.id} href={`/product/${product.id}`} className="group">
                     <div className="space-y-4">
                       <div className="relative overflow-hidden rounded-lg bg-muted h-80 sm:h-96">
-                        <img
-                          src={product.images[0]}
+                        <Image
+                          src={(product.images?.[0] && (product.images[0].startsWith('/') || product.images[0].startsWith('http://') || product.images[0].startsWith('https://'))) ? product.images[0] : '/assets/bag.jpg'}
                           alt={product.name}
+                          fill
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                       </div>
                       <div className="space-y-2">
