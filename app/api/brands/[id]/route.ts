@@ -10,6 +10,10 @@ export async function GET(
     await connectToDatabase();
     const { id } = await params;
 
+    const cacheHeaders = {
+      'Cache-Control': 'public, max-age=60, s-maxage=3600, stale-while-revalidate=59',
+    };
+
     // Find by the custom string id field (slug like 'chanel')
     const brand = await Brand.findOne({ id });
 
@@ -20,7 +24,7 @@ export async function GET(
       }, { status: 404 });
     }
 
-    return NextResponse.json(brand);
+    return NextResponse.json(brand, { headers: cacheHeaders });
   } catch (error: any) {
     console.error('Fetch single brand error:', error);
     return NextResponse.json({

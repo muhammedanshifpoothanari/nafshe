@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Star, ShoppingBag, Plus, Scissors, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
+import { getOptimizedImageUrl } from '@/lib/utils';
 
 interface Product {
   id: string;
@@ -135,7 +136,7 @@ function ProductCard({ product }: { product: Product }) {
       <div className="relative aspect-[3/4] bg-neutral-50 overflow-hidden shadow-sm p-1.5 border border-dashed border-accent/10 group-hover:border-accent/40 transition-all duration-700">
         <div className="relative h-full w-full overflow-hidden">
            <Image 
-             src={product.images?.[0] || product.image || '/placeholder.jpg'} 
+             src={getOptimizedImageUrl(product.images?.[0] || product.image || '/placeholder.jpg', 600)} 
              alt={product.name} 
              fill 
              className="object-cover group-hover:scale-105 transition-all duration-1000" 

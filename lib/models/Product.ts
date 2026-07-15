@@ -17,7 +17,9 @@ const ProductSchema = new Schema({
   views: { type: Number, default: 0 },
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'approved' },
   vendorId: { type: String, default: 'nafshe' },
-  feedback: { type: String, default: '' }
+  feedback: { type: String, default: '' },
+  fulfillmentType: { type: String, enum: ['FBA', 'FBM'], default: 'FBM' },
+  costPrice: { type: Number, default: 0 }
 }, {
   timestamps: true,
 });

@@ -16,12 +16,17 @@ export async function GET(request: Request) {
     const status = searchParams.get('status'); // 'pending', 'approved', 'rejected', 'all'
     const isAdmin = searchParams.get('isAdmin') === 'true';
 
+    const cacheHeaders = {
+      'Cache-Control': 'public, max-age=60, s-maxage=3600, stale-while-revalidate=59',
+    };
+
     // 1. Check cache first
     const cacheKey = `products:list:${request.url}`;
     const cachedProducts = cache.get(cacheKey);
     if (cachedProducts) {
-      return NextResponse.json(cachedProducts);
+      return NextResponse.json(cachedProducts, { headers: cacheHeaders });
     }
+
 
     // Build filter query
     const filterQuery: any = {};
@@ -86,7 +91,7 @@ export async function GET(request: Request) {
     // Save to cache for 5 minutes
     cache.set(cacheKey, products, 300);
 
-    return NextResponse.json(products);
+    return NextResponse.json(products, { headers: cacheHeaders });
   } catch (error: any) {
     console.error('Fetch products error:', error);
     return NextResponse.json({

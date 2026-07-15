@@ -9,11 +9,15 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const featured = searchParams.get('featured');
 
+    const cacheHeaders = {
+      'Cache-Control': 'public, max-age=60, s-maxage=3600, stale-while-revalidate=59',
+    };
+
     // Check cache first
     const cacheKey = `brands:${request.url}`;
     const cachedBrands = cache.get(cacheKey);
     if (cachedBrands) {
-      return NextResponse.json(cachedBrands);
+      return NextResponse.json(cachedBrands, { headers: cacheHeaders });
     }
 
     const filterQuery: any = {};
@@ -26,7 +30,7 @@ export async function GET(request: Request) {
     // Save to cache for 1 hour
     cache.set(cacheKey, brands, 3600);
 
-    return NextResponse.json(brands);
+    return NextResponse.json(brands, { headers: cacheHeaders });
   } catch (error: any) {
     console.error('Fetch brands error:', error);
     return NextResponse.json({

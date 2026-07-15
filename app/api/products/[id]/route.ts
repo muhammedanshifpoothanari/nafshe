@@ -11,11 +11,15 @@ export async function GET(
     await connectToDatabase();
     const { id } = await params;
 
+    const cacheHeaders = {
+      'Cache-Control': 'public, max-age=60, s-maxage=3600, stale-while-revalidate=59',
+    };
+
     // Check cache first
     const cacheKey = `products:single:${id}`;
     const cachedProduct = cache.get(cacheKey);
     if (cachedProduct) {
-      return NextResponse.json(cachedProduct);
+      return NextResponse.json(cachedProduct, { headers: cacheHeaders });
     }
 
     // Find by the custom string id field
@@ -31,7 +35,7 @@ export async function GET(
     // Cache the single product for 5 minutes
     cache.set(cacheKey, product, 300);
 
-    return NextResponse.json(product);
+    return NextResponse.json(product, { headers: cacheHeaders });
   } catch (error: any) {
     console.error('Fetch single product error:', error);
     return NextResponse.json({

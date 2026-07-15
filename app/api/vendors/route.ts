@@ -5,8 +5,11 @@ import Vendor from '@/lib/models/Vendor';
 export async function GET() {
   try {
     await connectToDatabase();
+    const cacheHeaders = {
+      'Cache-Control': 'public, max-age=60, s-maxage=3600, stale-while-revalidate=59',
+    };
     const vendors = await Vendor.find({}).sort({ createdAt: -1 });
-    return NextResponse.json(vendors);
+    return NextResponse.json(vendors, { headers: cacheHeaders });
   } catch (error: any) {
     console.error('Fetch vendors error:', error);
     return NextResponse.json({

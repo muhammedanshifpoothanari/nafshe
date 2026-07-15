@@ -10,6 +10,10 @@ export async function GET(
     await connectToDatabase();
     const { id } = await params;
 
+    const cacheHeaders = {
+      'Cache-Control': 'public, max-age=60, s-maxage=3600, stale-while-revalidate=59',
+    };
+
     const vendor = await Vendor.findOne({ id });
 
     if (!vendor) {
@@ -19,7 +23,7 @@ export async function GET(
       }, { status: 404 });
     }
 
-    return NextResponse.json(vendor);
+    return NextResponse.json(vendor, { headers: cacheHeaders });
   } catch (error: any) {
     console.error('Fetch vendor details error:', error);
     return NextResponse.json({

@@ -11,7 +11,9 @@ const VendorSchema = new Schema({
   tier: { type: String, default: 'Standard' },
   commissionRate: { type: Number, default: 15 },
   taxId: { type: String, default: '' },
-  bankAccount: { type: String, default: '' }
+  bankAccount: { type: String, default: '' },
+  passwordHash: { type: String, default: '' },
+  consignment: { type: Boolean, default: false }
 }, {
   timestamps: true,
 });

@@ -7,10 +7,14 @@ export async function GET(request: Request) {
   try {
     await connectToDatabase();
     
+    const cacheHeaders = {
+      'Cache-Control': 'public, max-age=60, s-maxage=3600, stale-while-revalidate=59',
+    };
+
     const cacheKey = 'stories:all';
     const cachedStories = cache.get(cacheKey);
     if (cachedStories) {
-      return NextResponse.json(cachedStories);
+      return NextResponse.json(cachedStories, { headers: cacheHeaders });
     }
 
     const stories = await Story.find({});
@@ -18,7 +22,7 @@ export async function GET(request: Request) {
     // Save to cache for 1 hour
     cache.set(cacheKey, stories, 3600);
 
-    return NextResponse.json(stories);
+    return NextResponse.json(stories, { headers: cacheHeaders });
   } catch (error: any) {
     console.error('Fetch stories error:', error);
     return NextResponse.json({
