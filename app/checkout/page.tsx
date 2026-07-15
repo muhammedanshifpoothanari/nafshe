@@ -12,25 +12,26 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(1);
   const [shippingForm, setShippingForm] = useState({
     firstName: '',
-    lastName: '',
+    mobile: '',
     email: '',
     address: '',
     city: 'Jeddah',
-    postalCode: '',
     country: 'Saudi Arabia'
   });
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'tabby' | 'tamara' | 'card'>('cod');
 
   const handleFinalizeAcquisition = () => {
     const sessionId = localStorage.getItem('nafshe_session_id') || '';
     const formattedPayload = {
-      customerName: `${shippingForm.firstName} ${shippingForm.lastName}`,
-      customerEmail: shippingForm.email,
-      shippingAddress: shippingForm.address,
+      customerName: shippingForm.firstName,
+      customerEmail: shippingForm.email || `${shippingForm.mobile}@nafshe.sa`,
+      shippingAddress: `${shippingForm.address}, Mobile: ${shippingForm.mobile}`,
       city: shippingForm.city,
-      postalCode: shippingForm.postalCode,
+      postalCode: '00000',
       country: shippingForm.country,
       vendor: items[0]?.brand || 'Nafshe HQ',
       amount: total,
+      paymentMethod,
       items: items.map(item => ({
         productId: item.productId,
         name: item.name,
@@ -56,7 +57,7 @@ export default function CheckoutPage() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 sessionId,
-                email: shippingForm.email,
+                email: shippingForm.email || `${shippingForm.mobile}@nafshe.sa`,
                 converted: true
               })
             }).catch(err => console.error('Error converting cart:', err));
@@ -96,74 +97,70 @@ export default function CheckoutPage() {
                 <div className="space-y-12 animate-fade-in">
                    <div className="space-y-2">
                       <h2 className="text-3xl font-light text-luxury uppercase tracking-tight">Delivery <span className="italic serif">Sanctuary</span></h2>
-                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Where should your acquisitions be dispatched?</p>
+                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Fast Checkout (Saudi Arabia Local Delivery)</p>
                    </div>
 
                    <form className="space-y-8" onSubmit={(e) => { e.preventDefault(); setStep(2); }}>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                          <div className="space-y-2">
-                            <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">First Name</label>
+                            <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Full Name</label>
                             <input 
                               required 
                               type="text" 
                               value={shippingForm.firstName}
                               onChange={(e) => setShippingForm({ ...shippingForm, firstName: e.target.value })}
+                              placeholder="Mohammed Al-Otaibi"
                               className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" 
                             />
                          </div>
                          <div className="space-y-2">
-                            <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Last Name</label>
+                            <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Mobile Number (Required)</label>
                             <input 
                               required 
-                              type="text" 
-                              value={shippingForm.lastName}
-                              onChange={(e) => setShippingForm({ ...shippingForm, lastName: e.target.value })}
+                              type="tel" 
+                              placeholder="+966 50 000 0000"
+                              value={shippingForm.mobile}
+                              onChange={(e) => setShippingForm({ ...shippingForm, mobile: e.target.value })}
                               className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" 
                             />
                          </div>
                       </div>
                       <div className="space-y-2">
-                         <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Operational Email Address</label>
+                         <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Operational Email Address (Optional)</label>
                          <input 
-                           required 
                            type="email" 
-                           placeholder="client@example.com" 
+                           placeholder="client@nafshe.sa" 
                            value={shippingForm.email}
                            onChange={(e) => setShippingForm({ ...shippingForm, email: e.target.value })}
                            className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" 
                          />
                       </div>
                       <div className="space-y-2">
-                         <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Street Address</label>
+                         <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Street Address / District</label>
                          <input 
                            required 
                            type="text" 
-                           placeholder="King Abdulaziz Road, Jeddah" 
+                           placeholder="Al-Hamra District, King Fahd Road" 
                            value={shippingForm.address}
                            onChange={(e) => setShippingForm({ ...shippingForm, address: e.target.value })}
                            className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" 
                          />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                          <div className="space-y-2">
                             <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">City</label>
-                            <input 
-                              required 
-                              type="text" 
+                            <select 
                               value={shippingForm.city}
                               onChange={(e) => setShippingForm({ ...shippingForm, city: e.target.value })}
                               className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" 
-                            />
-                         </div>
-                         <div className="space-y-2">
-                            <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Postal Code</label>
-                            <input 
-                              required 
-                              type="text" 
-                              value={shippingForm.postalCode}
-                              onChange={(e) => setShippingForm({ ...shippingForm, postalCode: e.target.value })}
-                              className="w-full bg-transparent border-b border-border py-4 text-sm font-light outline-none focus:border-accent" 
-                            />
+                            >
+                              <option value="Riyadh">Riyadh</option>
+                              <option value="Jeddah">Jeddah</option>
+                              <option value="Dammam">Dammam</option>
+                              <option value="Makkah">Makkah</option>
+                              <option value="Madinah">Madinah</option>
+                              <option value="Khobar">Khobar</option>
+                            </select>
                          </div>
                          <div className="space-y-2">
                             <label className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Country</label>
@@ -181,30 +178,76 @@ export default function CheckoutPage() {
                 <div className="space-y-12 animate-fade-in">
                    <div className="space-y-2">
                       <h2 className="text-3xl font-light text-luxury uppercase tracking-tight">Secure <span className="italic serif">Settlement</span></h2>
-                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Encrypted acquisition processing</p>
+                      <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Select Local Saudi Payment Method</p>
                    </div>
 
                    <div className="space-y-6">
-                      <div className="p-8 border border-accent bg-accent/5 flex items-center justify-between">
+                      {/* Cash on Delivery */}
+                      <div 
+                        onClick={() => setPaymentMethod('cod')}
+                        className={`p-6 border cursor-pointer transition-all flex items-center justify-between ${
+                          paymentMethod === 'cod' ? 'border-accent bg-accent/5' : 'border-border bg-white hover:bg-neutral-50'
+                        }`}
+                      >
+                         <div className="flex items-center gap-6">
+                            <Truck className="w-6 h-6 text-accent" />
+                            <div>
+                               <p className="text-sm font-bold uppercase tracking-widest">Cash on Delivery (COD)</p>
+                               <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">Pay upon safe arrival in SAR</p>
+                            </div>
+                         </div>
+                         <div className={`w-5 h-5 rounded-full border ${paymentMethod === 'cod' ? 'border-4 border-accent' : 'border-border'}`} />
+                      </div>
+
+                      {/* Tabby */}
+                      <div 
+                        onClick={() => setPaymentMethod('tabby')}
+                        className={`p-6 border cursor-pointer transition-all flex items-center justify-between ${
+                          paymentMethod === 'tabby' ? 'border-accent bg-accent/5' : 'border-border bg-white hover:bg-neutral-50'
+                        }`}
+                      >
+                         <div className="flex items-center gap-6">
+                            <span className="text-xs font-black bg-emerald-500 text-white px-3 py-1.5 uppercase tracking-widest font-mono">Tabby</span>
+                            <div>
+                               <p className="text-sm font-bold uppercase tracking-widest">Split in 4 Payments (Tabby)</p>
+                               <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">No interest, no hidden fees</p>
+                            </div>
+                         </div>
+                         <div className={`w-5 h-5 rounded-full border ${paymentMethod === 'tabby' ? 'border-4 border-accent' : 'border-border'}`} />
+                      </div>
+
+                      {/* Tamara */}
+                      <div 
+                        onClick={() => setPaymentMethod('tamara')}
+                        className={`p-6 border cursor-pointer transition-all flex items-center justify-between ${
+                          paymentMethod === 'tamara' ? 'border-accent bg-accent/5' : 'border-border bg-white hover:bg-neutral-50'
+                        }`}
+                      >
+                         <div className="flex items-center gap-6">
+                            <span className="text-xs font-black bg-amber-500 text-white px-3 py-1.5 uppercase tracking-widest font-mono">Tamara</span>
+                            <div>
+                               <p className="text-sm font-bold uppercase tracking-widest">Pay in Installments (Tamara)</p>
+                               <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">Secure local checkout</p>
+                            </div>
+                         </div>
+                         <div className={`w-5 h-5 rounded-full border ${paymentMethod === 'tamara' ? 'border-4 border-accent' : 'border-border'}`} />
+                      </div>
+
+                      {/* Credit Card / Apple Pay */}
+                      <div 
+                        onClick={() => setPaymentMethod('card')}
+                        className={`p-6 border cursor-pointer transition-all flex items-center justify-between ${
+                          paymentMethod === 'card' ? 'border-accent bg-accent/5' : 'border-border bg-white hover:bg-neutral-50'
+                        }`}
+                      >
                          <div className="flex items-center gap-6">
                             <CreditCard className="w-6 h-6 text-accent" />
                             <div>
-                               <p className="text-sm font-bold uppercase tracking-widest">Apple Pay / Cards</p>
-                               <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">One-click secure payment</p>
+                               <p className="text-sm font-bold uppercase tracking-widest">Mada / Credit Card / Apple Pay</p>
+                               <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">Instant encrypted processing</p>
                             </div>
                          </div>
-                         <div className="w-5 h-5 rounded-full border-4 border-accent" />
-                      </div>
-                      
-                      <div className="p-8 border border-border flex items-center justify-between opacity-50 grayscale cursor-not-allowed">
-                         <div className="flex items-center gap-6">
-                            <ShieldCheck className="w-6 h-6 text-muted-foreground" />
-                            <div>
-                               <p className="text-sm font-bold uppercase tracking-widest">Maison Credit</p>
-                               <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">Available for Elite Members only</p>
-                            </div>
-                         </div>
-                         <div className="w-5 h-5 rounded-full border-2 border-border" />
+                         <div className={`w-5 h-5 rounded-full border ${paymentMethod === 'card' ? 'border-4 border-accent' : 'border-border'}`} />
                       </div>
                    </div>
 
@@ -226,12 +269,12 @@ export default function CheckoutPage() {
                       </div>
                       <h1 className="text-5xl font-light text-luxury tracking-tighter">Reservation <span className="italic serif">Confirmed</span></h1>
                       <p className="text-sm text-muted-foreground font-light max-w-md mx-auto leading-relaxed">
-                         "Your acquisitions have been successfully reserved and are being prepared at our Jeddah HQ. A private concierge will contact you shortly."
+                         "Your order has been successfully placed. We are preparing your shipment at our Riyadh hub. A private delivery concierge will contact you shortly."
                       </p>
                    </div>
                    <div className="pt-10">
-                      <Link href="/profile" className="inline-block px-12 py-5 border border-primary text-primary text-[10px] uppercase tracking-[0.4em] font-bold hover:bg-primary hover:text-white transition-all">
-                         Track My Reservation
+                      <Link href="/" className="inline-block px-12 py-5 border border-primary text-primary text-[10px] uppercase tracking-[0.4em] font-bold hover:bg-primary hover:text-white transition-all">
+                         Continue Shopping
                       </Link>
                    </div>
                 </div>
@@ -253,7 +296,7 @@ export default function CheckoutPage() {
                          <div className="flex-1 space-y-1">
                             <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold">{item.brand}</p>
                             <h3 className="text-sm font-light text-luxury">{item.name}</h3>
-                            <p className="text-[10px] font-bold">${item.price.toLocaleString()} x {item.quantity}</p>
+                            <p className="text-[10px] font-bold">SAR {item.price.toLocaleString()} x {item.quantity}</p>
                          </div>
                       </div>
                     ))}
@@ -262,7 +305,7 @@ export default function CheckoutPage() {
                  <div className="space-y-4 border-t border-border pt-10">
                     <div className="flex justify-between text-sm">
                        <span className="font-light text-muted-foreground italic">Subtotal</span>
-                       <span className="font-bold">${total.toLocaleString()}</span>
+                       <span className="font-bold">SAR {total.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                        <span className="font-light text-muted-foreground italic">Logistics</span>
@@ -270,7 +313,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex justify-between text-sm pt-4 border-t border-border">
                        <span className="font-bold uppercase tracking-widest text-[10px]">Total Settlement</span>
-                       <span className="text-2xl font-light text-luxury">${total.toLocaleString()}</span>
+                       <span className="text-2xl font-light text-luxury">SAR {total.toLocaleString()}</span>
                     </div>
                  </div>
 

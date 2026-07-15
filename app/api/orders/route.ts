@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import Order from '@/lib/models/Order';
+import { PaymentProcessorFactory, AuditService } from '@/lib/services/systemDesign';
 
 export async function GET() {
   try {
@@ -30,7 +31,8 @@ export async function POST(request: Request) {
       country,
       vendor,
       amount,
-      items
+      items,
+      paymentMethod
     } = body;
 
     if (!customerName || !customerEmail || !shippingAddress || !amount || !items || items.length === 0) {
@@ -38,6 +40,18 @@ export async function POST(request: Request) {
         success: false,
         message: 'Missing required order fields'
       }, { status: 400 });
+    }
+
+    // 1. Process payment via Strategy + Factory Method Patterns
+    const selectedMethod = paymentMethod || 'cod';
+    const paymentProcessor = PaymentProcessorFactory.getPaymentMethod(selectedMethod);
+    const paymentResult = paymentProcessor.processPayment(amount, { email: customerEmail });
+
+    if (!paymentResult.success) {
+      return NextResponse.json({
+        success: false,
+        message: 'Payment verification failed'
+      }, { status: 402 });
     }
 
     // Generate unique order reference like '#10001'
@@ -59,10 +73,10 @@ export async function POST(request: Request) {
       customerEmail,
       shippingAddress,
       city,
-      postalCode,
+      postalCode: postalCode || '00000',
       country: country || 'Saudi Arabia',
       vendor: vendor || 'Nafshe HQ',
-      amount,
+      amount: amount + (paymentResult.fee || 0), // Include payment fee (e.g. COD shipping fee)
       items,
       status: 'Pending',
       trackingId: `TRK${Math.floor(100000 + Math.random() * 900000)}`,
@@ -70,6 +84,15 @@ export async function POST(request: Request) {
     });
 
     await newOrder.save();
+
+    // 2. Log event via Singleton Audit Ledger Pattern
+    const auditor = AuditService.getInstance();
+    auditor.logEvent('ORDER_ACQUIRED', {
+      orderId,
+      amount: newOrder.amount,
+      method: selectedMethod,
+      transactionId: paymentResult.transactionId
+    });
 
     return NextResponse.json({
       success: true,

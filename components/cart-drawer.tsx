@@ -4,9 +4,11 @@ import { useCart } from '@/lib/context/cart-context';
 import { X, Minus, Plus, ShoppingBag, Truck, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function CartDrawer() {
   const { items, removeItem, updateQuantity, total, isOpen, setIsOpen } = useCart();
+  const router = useRouter();
   
   const FREE_SHIPPING_THRESHOLD = 5000;
   const progress = Math.min((total / FREE_SHIPPING_THRESHOLD) * 100, 100);
@@ -44,7 +46,7 @@ export function CartDrawer() {
           <div className="flex items-center justify-between text-[10px] uppercase tracking-widest font-bold">
             <div className="flex items-center gap-2">
               <Truck className={`w-4 h-4 ${progress === 100 ? 'text-primary' : 'text-muted-foreground'}`} />
-              <span>{progress === 100 ? 'You qualified for free shipping!' : `Spend $${remaining.toLocaleString()} more for free shipping`}</span>
+              <span>{progress === 100 ? 'You qualified for free shipping!' : `Spend SAR ${remaining.toLocaleString()} more for free shipping`}</span>
             </div>
             <span className="text-muted-foreground">{Math.round(progress)}%</span>
           </div>
@@ -78,13 +80,13 @@ export function CartDrawer() {
                     </div>
                     <div className="flex-1 space-y-1">
                       <div className="flex justify-between items-start">
-                        <div>
+                        <div className="pr-4">
                           <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold">{item.brand}</p>
-                          <h3 className="text-xs font-medium">{item.name}</h3>
+                          <h3 className="text-xs font-medium truncate max-w-[180px]">{item.name}</h3>
                         </div>
                         <button 
                           onClick={() => removeItem(item.productId)}
-                          className="text-muted-foreground hover:text-destructive transition-colors"
+                          className="text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -105,7 +107,7 @@ export function CartDrawer() {
                             <Plus className="w-3 h-3" />
                           </button>
                         </div>
-                        <p className="text-xs font-bold">${(item.price * item.quantity).toLocaleString()}</p>
+                        <p className="text-xs font-bold">SAR {(item.price * item.quantity).toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
@@ -131,7 +133,7 @@ export function CartDrawer() {
                         <div className="flex-1">
                            <p className="text-[8px] font-bold text-muted-foreground uppercase">{p.brand}</p>
                            <p className="text-[10px] font-medium leading-tight">{p.name}</p>
-                           <p className="text-[10px] font-bold mt-0.5">${p.price.toLocaleString()}</p>
+                           <p className="text-[10px] font-bold mt-0.5">SAR {p.price.toLocaleString()}</p>
                         </div>
                         <button className="px-4 py-2 border border-primary text-primary text-[8px] uppercase tracking-widest font-bold hover:bg-primary hover:text-primary-foreground transition-all">
                            Add
@@ -149,16 +151,19 @@ export function CartDrawer() {
           <div className="p-6 border-t border-border space-y-4">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest">
               <span>Subtotal</span>
-              <span>${total.toLocaleString()}</span>
+              <span>SAR {total.toLocaleString()}</span>
             </div>
             <p className="text-[10px] text-muted-foreground italic text-center">Taxes and shipping calculated at checkout.</p>
-            <Link 
-              href="/checkout"
+            <button 
+              onClick={() => {
+                setIsOpen(false);
+                router.push('/checkout');
+              }}
               className="w-full py-4 bg-primary text-primary-foreground text-[10px] uppercase tracking-[0.3em] font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-xl shadow-primary/20"
             >
               Checkout Now
               <ArrowRight className="w-4 h-4" />
-            </Link>
+            </button>
           </div>
         )}
       </div>

@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { Providers } from '@/components/providers'
 import { NafsheHeader } from '@/components/nafshe-header'
 import { NafsheConversionHooks } from '@/components/nafshe-conversion-hooks'
+import { ScrollToTop } from '@/components/ScrollToTop'
 import './globals.css'
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans', display: 'swap' });
@@ -35,6 +36,7 @@ export default function RootLayout({
         <div className="fixed inset-0 pointer-events-none opacity-[0.04] z-[9999] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat" />
         
         <Providers>
+          <ScrollToTop />
           <NafsheConversionHooks />
           <div className="relative z-10 flex flex-col min-h-screen">
              <NafsheHeader />

@@ -56,8 +56,25 @@ export function StoryCarousel() {
         nextStory();
       }, 5000); // 5 seconds per story
     }
-    return () => clearTimeout(timer);
-  }, [selectedStory, storyIndex, nextStory]);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedStory) {
+        if (e.key === 'ArrowRight') {
+          nextStory();
+        } else if (e.key === 'ArrowLeft') {
+          prevStory();
+        } else if (e.key === 'Escape') {
+          closeStory();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedStory, storyIndex, nextStory, prevStory, closeStory]);
 
   const openStory = (index: number) => {
     setSelectedStory(STORIES[index]);
@@ -131,9 +148,19 @@ export function StoryCarousel() {
       {/* Story Modal — Premium Radiant Fullscreen */}
       {selectedStory && (
         <div 
-          className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-2xl animate-fade-in flex flex-col items-center justify-center p-0"
+          className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-2xl animate-fade-in flex items-center justify-center p-0"
           onClick={closeStory}
         >
+          {/* Desktop Left Navigation Button */}
+          {storyIndex > 0 && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); prevStory(); }}
+              className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full items-center justify-center transition-all z-[100000]"
+            >
+              ‹
+            </button>
+          )}
+
           <div 
             className="relative w-full h-full max-w-lg bg-black overflow-hidden md:h-[90vh] md:rounded-3xl shadow-2xl border border-white/10"
             onClick={(e) => e.stopPropagation()}
@@ -145,8 +172,8 @@ export function StoryCarousel() {
                 {STORIES.map((_, i) => (
                   <div key={i} className="flex-1 h-[2.5px] bg-white/20 rounded-full overflow-hidden">
                     <div 
-                      className={`h-full bg-white transition-all duration-[5000ms] ease-linear ${
-                        i === storyIndex ? 'w-full' : i < storyIndex ? 'w-full' : 'w-0'
+                      className={`h-full bg-white ${
+                        i === storyIndex ? 'w-full duration-[5000ms] ease-linear transition-all' : i < storyIndex ? 'w-full' : 'w-0'
                       }`}
                       key={`${i}-${storyIndex}`} // Force re-render of current bar
                     />
@@ -176,8 +203,8 @@ export function StoryCarousel() {
             </div>
 
             {/* Navigation Tap Zones */}
-            <div className="absolute inset-y-0 left-0 w-1/4 z-40 cursor-pointer" onClick={prevStory} title="Previous" />
-            <div className="absolute inset-y-0 right-0 w-1/4 z-40 cursor-pointer" onClick={nextStory} title="Next" />
+            <div className="absolute inset-y-0 left-0 w-1/3 z-40 cursor-pointer" onClick={prevStory} title="Previous" />
+            <div className="absolute inset-y-0 right-0 w-1/3 z-40 cursor-pointer" onClick={nextStory} title="Next" />
 
             {/* Bottom Content */}
             <div className="absolute bottom-0 left-0 w-full p-10 pb-16 bg-gradient-to-t from-black/80 via-black/20 to-transparent text-center z-30">
@@ -190,6 +217,16 @@ export function StoryCarousel() {
               </a>
             </div>
           </div>
+
+          {/* Desktop Right Navigation Button */}
+          {storyIndex < STORIES.length - 1 && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); nextStory(); }}
+              className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full items-center justify-center transition-all z-[100000]"
+            >
+              ›
+            </button>
+          )}
         </div>
       )}
     </>
