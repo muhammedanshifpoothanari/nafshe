@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     };
 
     const cacheKey = 'testimonials:all';
-    const cachedTestimonials = cache.get(cacheKey);
+    const cachedTestimonials = await cache.get(cacheKey);
     if (cachedTestimonials) {
       return NextResponse.json(cachedTestimonials, { headers: cacheHeaders });
     }
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     const testimonials = await Testimonial.find({});
 
     // Save to cache for 1 hour
-    cache.set(cacheKey, testimonials, 3600);
+    await cache.set(cacheKey, testimonials, 3600);
 
     return NextResponse.json(testimonials, { headers: cacheHeaders });
   } catch (error: any) {

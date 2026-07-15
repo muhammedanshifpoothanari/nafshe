@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
     // Check cache first
     const cacheKey = `brands:${request.url}`;
-    const cachedBrands = cache.get(cacheKey);
+    const cachedBrands = await cache.get(cacheKey);
     if (cachedBrands) {
       return NextResponse.json(cachedBrands, { headers: cacheHeaders });
     }
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     const brands = await Brand.find(filterQuery);
 
     // Save to cache for 1 hour
-    cache.set(cacheKey, brands, 3600);
+    await cache.set(cacheKey, brands, 3600);
 
     return NextResponse.json(brands, { headers: cacheHeaders });
   } catch (error: any) {

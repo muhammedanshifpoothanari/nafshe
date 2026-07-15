@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     };
 
     const cacheKey = 'stories:all';
-    const cachedStories = cache.get(cacheKey);
+    const cachedStories = await cache.get(cacheKey);
     if (cachedStories) {
       return NextResponse.json(cachedStories, { headers: cacheHeaders });
     }
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     const stories = await Story.find({});
 
     // Save to cache for 1 hour
-    cache.set(cacheKey, stories, 3600);
+    await cache.set(cacheKey, stories, 3600);
 
     return NextResponse.json(stories, { headers: cacheHeaders });
   } catch (error: any) {

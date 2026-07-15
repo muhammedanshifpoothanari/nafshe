@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
     // 1. Check cache first
     const cacheKey = `products:list:${request.url}`;
-    const cachedProducts = cache.get(cacheKey);
+    const cachedProducts = await cache.get(cacheKey);
     if (cachedProducts) {
       return NextResponse.json(cachedProducts, { headers: cacheHeaders });
     }
@@ -89,7 +89,7 @@ export async function GET(request: Request) {
     const products = await Product.find(filterQuery).sort(sortQuery);
 
     // Save to cache for 5 minutes
-    cache.set(cacheKey, products, 300);
+    await cache.set(cacheKey, products, 300);
 
     return NextResponse.json(products, { headers: cacheHeaders });
   } catch (error: any) {
@@ -153,7 +153,7 @@ export async function POST(request: Request) {
     await newProduct.save();
 
     // Invalidate products cache
-    cache.invalidatePrefix('products:');
+    await cache.invalidatePrefix('products:');
 
     return NextResponse.json({
       success: true,

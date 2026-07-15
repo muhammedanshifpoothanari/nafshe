@@ -651,7 +651,7 @@ export async function GET() {
     await Testimonial.insertMany(formattedTestimonials);
 
     // Clear entire cache on fresh seed
-    cache.clear();
+    await cache.clear();
 
     return NextResponse.json({
       success: true,

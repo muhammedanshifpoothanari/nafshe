@@ -49,7 +49,7 @@ export async function PUT(
           await Product.findOneAndDelete({ id: appReq.targetId });
         }
         // Invalidate cache
-        cache.invalidatePrefix('products:');
+        await cache.invalidatePrefix('products:');
       } else if (appReq.type === 'bda') {
         if (appReq.action === 'create') {
           const newBda = new BDA({

@@ -17,7 +17,7 @@ export async function GET(
 
     // Check cache first
     const cacheKey = `products:single:${id}`;
-    const cachedProduct = cache.get(cacheKey);
+    const cachedProduct = await cache.get(cacheKey);
     if (cachedProduct) {
       return NextResponse.json(cachedProduct, { headers: cacheHeaders });
     }
@@ -33,7 +33,7 @@ export async function GET(
     }
 
     // Cache the single product for 5 minutes
-    cache.set(cacheKey, product, 300);
+    await cache.set(cacheKey, product, 300);
 
     return NextResponse.json(product, { headers: cacheHeaders });
   } catch (error: any) {
@@ -69,7 +69,7 @@ export async function PUT(
     }
 
     // Invalidate product caches
-    cache.invalidatePrefix('products:');
+    await cache.invalidatePrefix('products:');
 
     return NextResponse.json({
       success: true,
@@ -103,7 +103,7 @@ export async function DELETE(
     }
 
     // Invalidate product caches
-    cache.invalidatePrefix('products:');
+    await cache.invalidatePrefix('products:');
 
     return NextResponse.json({
       success: true,
